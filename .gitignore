@@ -1,0 +1,17 @@
+# Virtual environments
+.venv/
+
+# Env files
+.env
+.env.sample
+
+# Python cache
+__pycache__/
+.*__pycache__/
+
+# Docker compose file (optional, if not needed in repo)
+docker-compose.yaml
+
+# Sensitive files
+handlers.py
+security.py

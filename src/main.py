@@ -1,0 +1,10 @@
+from fastapi import FastAPI
+from shopcart_service.core.db import Base, engine
+from shopcart_service.api.v1 import routes as routes_v1
+
+# Initialize database
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="Shopcart Service")
+
+app.include_router(routes_v1.router, prefix="/api/v1/cart", tags=["Cart v1"])
