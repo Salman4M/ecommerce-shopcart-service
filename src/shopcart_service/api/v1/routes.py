@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
-from shopcart_service import crud, schemas
-from shopcart_service.core import db
+from src.shopcart_service import crud, schemas
+from src.shopcart_service.core import db
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
 

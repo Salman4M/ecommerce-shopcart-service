@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from shopcart_service.core.config import get_settings
+from src.shopcart_service.core.config import get_settings
 
 settings = get_settings()
 
