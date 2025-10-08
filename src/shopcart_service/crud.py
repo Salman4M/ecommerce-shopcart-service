@@ -21,7 +21,7 @@ def create_cart(db: Session, cart: schemas.ShopCartCreate):
     return db_cart
 
 def get_user_by_uuid(db: Session , user_uuid: UUID4):
-    db_check = db.query(models.ShopCart).filter(cast(models.ShopCart.user_uuid,String)==str(user_uuid)).first()#to ignore varchar uuid
+    db_check = db.query(models.ShopCart).filter(models.ShopCart.user_uuid==user_uuid).first()
     return db_check
 
 # def get_cart(db: Session, user_uuid: UUID):
