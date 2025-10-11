@@ -12,8 +12,6 @@ alembic/
 __pycache__/
 .*__pycache__/
 
-# Docker compose file (optional, if not needed in repo)
-docker-compose.yaml
 
 # Sensitive files
 handlers.py

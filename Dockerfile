@@ -1,7 +1,8 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
 
 WORKDIR /app
 
@@ -9,15 +10,21 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy dependencies
-COPY src/pyproject.toml src/uv.lock ./
+COPY pyproject.toml uv.lock ./
 
 # Install Python dependencies
 RUN pip install uv && uv sync --frozen
 
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
 # Copy all application code
-COPY src/ /app
+COPY src/ /app/src
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app/src
 
-# Default command to run Django dev server
-CMD ["uv", "run","uvicorn" ,"python", "manage.py", "runserver", "0.0.0.0:8000"]
+EXPOSE 8000
+
+
+# Default command to run fastapi  server
+CMD ["uv", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--proxy-headers"]
