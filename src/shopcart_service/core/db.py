@@ -4,9 +4,9 @@ from src.shopcart_service.core.config import get_settings
 
 settings = get_settings()
 
-DATABASE_URL = settings.database_url
+DATABASE_URL = settings.DATABASE_URL
 
-engine = create_engine(settings.database_url, future=True)
+engine = create_engine(settings.DATABASE_URL, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 Base = declarative_base()
 

@@ -13,8 +13,12 @@ from pydantic import UUID4
 #     return cart
 
 #temporary
-def create_cart(db: Session, cart: schemas.ShopCartCreate):
-    db_cart = models.ShopCart(**cart.dict())
+def create_cart(db: Session, user_uuid: UUID4):
+    check_user = db.query(models.ShopCart).filter(models.ShopCart.user_uuid == user_uuid).first()
+    if check_user:
+        return check_user
+    
+    db_cart = models.ShopCart(user_uuid = user_uuid)
     db.add(db_cart)
     db.commit()
     db.refresh(db_cart)
@@ -24,11 +28,9 @@ def get_user_by_uuid(db: Session , user_uuid: UUID4):
     db_check = db.query(models.ShopCart).filter(models.ShopCart.user_uuid==user_uuid).first()
     return db_check
 
-# def get_cart(db: Session, user_uuid: UUID):
-#     return db.query(models.ShopCart).filter('47bfba5b-8e96-4f0c-af03-cc3e62c8e6ea' == user_uuid).first()
 
-def get_cart(db: Session, cart_id: int):
-    return db.query(models.ShopCart).filter(models.ShopCart.id == cart_id).first()
+def get_cart(db: Session, uuid: UUID4):
+    return db.query(models.ShopCart).filter(models.ShopCart.user_uuid == uuid).first()
 
 
 def update_cart(db: Session,item_id:int, cart_id: int, item: schemas.CartItemUpdate):
@@ -40,7 +42,7 @@ def update_cart(db: Session,item_id:int, cart_id: int, item: schemas.CartItemUpd
     db.refresh(db_item)
     return db_item
 
-def delete_cart_item(cart_id:int,item_id: int, db: Session):
+def delete_cart_item(db: Session,cart_id: int,item_id: int):
     db_item = db.query(models.CartItem).filter(models.CartItem.shop_cart_id==cart_id, models.CartItem.id == item_id).first()
     if not db_item:
         return None
@@ -68,6 +70,8 @@ def add_item_to_cart(db: Session, cart_id: int, item: schemas.CartItemCreate):
     return db_item
 
 
-
-
+#for gateway
+# def get_cart(db:Session, user_uuid: UUID4):
+#     db_check = db.query(models.ShopCart).filter(models.ShopCart.user_uuid==user_uuid).first()
+#     return db_check
 

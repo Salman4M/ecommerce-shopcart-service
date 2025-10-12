@@ -7,7 +7,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Shopcart Service")
 
-app.include_router(routes_v1.router, prefix="/api/v1/cart", tags=["Cart v1"])
+app.include_router(routes_v1.router, prefix="", tags=["Cart v1"])
 
 
 
