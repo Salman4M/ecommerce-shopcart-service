@@ -1,8 +1,6 @@
 # Virtual environments
 .venv/
 
-#Migrations
-alembic/
 
 # Env files
 .env
