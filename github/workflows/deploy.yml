@@ -9,34 +9,43 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout your code
-      - name: Checkout repo
+      # 1. Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up Google Cloud SDK
+      # 2. Setup gcloud CLI
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
 
-      # Step 3: Authenticate Docker with GCP
-      - name: Configure Docker for GCP
-        run: gcloud auth configure-docker
+      # 3. Configure Docker for Artifact Registry / GCR
+      - name: Configure Docker
+        run: gcloud auth configure-docker gcr.io
 
-      # Step 4: Build and push Docker image
-      - name: Build & push Docker image
+      # 4. Build & push image
+      - name: Build and push Docker image
         run: |
-          IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/shopcart-api:${GITHUB_SHA}"
+          IMAGE="gcr.io/${{ secrets.GCP_PROJECT_ID }}/shopcart-service:${GITHUB_SHA}"
           docker build -t $IMAGE .
           docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
-      # Step 5: Deploy to Cloud Run
+      # 5. Deploy to Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy shopcart-api \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/shopcart-api:${GITHUB_SHA} \
+          gcloud run deploy shopcart-service \
+            --image $IMAGE \
             --region ${{ secrets.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "DATABASE_URL=${{ secrets.DATABASE_URL }}"
+            --set-env-vars "SECRET_KEY=${{ secrets.SECRET_KEY }},\
+ALGORITHM=${{ secrets.ALGORITHM }},\
+ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }},\
+DATABASE_URL=${{ secrets.DATABASE_URL }},\
+DB_USER=${{ secrets.DB_USER }},\
+DB_PASSWORD=${{ secrets.DB_PASSWORD }},\
+DB_NAME=${{ secrets.DB_NAME }},\
+CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}"

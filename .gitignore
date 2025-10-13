@@ -16,3 +16,4 @@ __pycache__/
 # Sensitive files
 handlers.py
 security.py
+github-sa-key.json
