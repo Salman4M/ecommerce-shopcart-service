@@ -4,6 +4,7 @@
 
 # Env files
 .env
+.env.prod
 .env.sample
 
 # Python cache
