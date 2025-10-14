@@ -7,7 +7,7 @@ services:
     container_name: shopcart_service
     command: ["sh", "/app/entrypoint.sh"]
     ports:
-      - "8000:8000"
+      - "8080:8080"
     env_file:
       - .env
     depends_on:
