@@ -119,7 +119,19 @@ def delete_item(item_id: int, request: Request, db: Session = Depends(db.get_db)
 #     return crud.add_item_to_cart(db,cart_id,item)
 
 
-@router.get("/testurl/{cart_id}", response_model=schemas.ShopCartRead)
+# @router.get("/testurl/{cart_id}", response_model=schemas.ShopCartRead)
+# def get_cart(user_uuid: UUID4,request: Request, db: Session = Depends(db.get_db)):
+#     user_uuid = request.headers.get("X-User-Uuid")
+#     if not user_uuid:
+#         raise HTTPException(status = 401, detail=("User is not authenticated"))
+#     cart = crud.get_cart(db, user_uuid)
+#     if not cart:
+#         create_cart(db,user_uuid)
+#     return crud.get_cart(db,user_uuid)
+
+
+
+@router.get("/tester/{cart_id}", response_model=schemas.ShopCartRead)
 def get_cart(user_uuid: UUID4,request: Request, db: Session = Depends(db.get_db)):
     user_uuid = request.headers.get("X-User-Uuid")
     if not user_uuid:
