@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
@@ -15,7 +16,9 @@ class Settings(BaseSettings):
     CLOUD_SQL_CONNECTION_NAME: str = ""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(
+            ".env.prod" if os.getenv("ENV") == "production" else ".env"
+        ),
         case_sensitive=False,
         extra="ignore"
     )
@@ -24,5 +27,4 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     return Settings()
 
-# For backwards compatibility
 settings = get_settings()
