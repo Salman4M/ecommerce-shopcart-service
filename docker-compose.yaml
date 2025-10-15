@@ -10,14 +10,17 @@ services:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      - ENV=development
     depends_on:
       - db
     working_dir: /app
     volumes:
+    #mount local files so Uvicorn sees changes instantly
       - ./src:/app/src:rw
       - ./uv.lock:/app/uv.lock:rw
       - ./pyproject.toml:/app/pyproject.toml:rw
-      - ./.cache/uv:/home/appuser/.cache/uv  # fix permission denied errors
+      - ./.cache/uv:/home/appuser/.cache/uv  # fixing permission denied errors
     restart: unless-stopped
 
   db:

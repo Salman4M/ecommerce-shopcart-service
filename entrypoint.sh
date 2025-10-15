@@ -23,4 +23,10 @@ done
 alembic upgrade head || { echo "Migration failed!"; exit 1; }
 
 # Start FastAPI
-exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT} --proxy-headers
+if [ "$ENV" = "development" ]; then
+  echo "Running in development mode with reload..."
+  exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080} --reload
+else
+  echo "Running in production mode..."
+  exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080} --proxy-headers
+fi
