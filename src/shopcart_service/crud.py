@@ -42,7 +42,7 @@ def update_cart(db: Session,item_id:int, cart_id: int, item: schemas.CartItemUpd
     db.refresh(db_item)
     return db_item
 
-def delete_cart_item(db: Session,cart_id: int,item_id: int):
+def delete_cart_item(db: Session, item_id: int,cart_id: int):
     db_item = db.query(models.CartItem).filter(models.CartItem.shop_cart_id==cart_id, models.CartItem.id == item_id).first()
     if not db_item:
         return None
