@@ -26,9 +26,9 @@ def get_cart(user_uuid: UUID4, db: Session = Depends(db.get_db)):
 
 
 
-@router.post("/{cart_id}/items", response_model=schemas.CartItemRead)
-def add_item(cart_id: int, item: schemas.CartItemCreate, db: Session = Depends(db.get_db)):
-    return crud.add_item_to_cart(db, cart_id, item)
+@router.post("/{cart_id}/items/{product_var_id}", response_model=schemas.CartItemRead)
+def add_item(cart_id: int,product_var_id: int, item: schemas.CartItemCreate, db: Session = Depends(db.get_db)):
+    return crud.add_item_to_cart(db, product_var_id, cart_id, item)
 
 
 

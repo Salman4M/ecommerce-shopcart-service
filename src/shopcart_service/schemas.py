@@ -5,7 +5,6 @@ from pydantic import UUID4
 
 
 class CartItemBase(BaseModel):
-    product_variation_id: int
     quantity: int = 1
 
 class CartItemCreate(CartItemBase):
