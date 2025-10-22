@@ -1,7 +1,3 @@
-"""
-Final working authentication module
-src/shopcart_service/core/auth.py
-"""
 from fastapi import HTTPException, status, Depends
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel

@@ -1,0 +1,18 @@
+name: Notify Main Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send update notification
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.MAIN_REPO_PAT }}
+          repository: salman4mtest/blog-project
+          event-type: update-shopcart
+          client-payload: '{"service": "shopcart", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
