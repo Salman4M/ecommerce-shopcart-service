@@ -1,4 +1,4 @@
-name: Notify Main Repo
+name: Notify Main Repo 
 
 on:
   push:
@@ -14,5 +14,5 @@ jobs:
         with:
           token: ${{ secrets.MAIN_REPO_PAT }}
           repository: salman4mtest/blog-project
-          event-type: update-shopcart
+          event-type: update-ecommerce-shopcart-service 
           client-payload: '{"service": "shopcart", "ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
