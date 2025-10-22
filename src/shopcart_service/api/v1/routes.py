@@ -6,7 +6,7 @@ from src.shopcart_service import models
 from pydantic import UUID4
 from src.shopcart_service.core.auth import get_user_from_gateway, User  # Import here!
 
-router = APIRouter(prefix="/shopcart", tags=["Cart"])
+router = APIRouter(prefix="/shopcart/api", tags=["Cart"])
 
 # @router.post("/", response_model=schemas.ShopCartRead)
 # def create_cart(user_uuid: UUID4, db: Session = Depends(db.get_db)):
