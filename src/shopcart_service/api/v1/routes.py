@@ -211,6 +211,7 @@ def delete_cart_item(
 
 
 
+
 # @router.get("/tester/{cart_id}", response_model=schemas.ShopCartRead)
 # def get_cart(Request, db: Session = Depends(db.get_db)):
 #     user_uuid = request.headers.get("X-User-Uuid")
