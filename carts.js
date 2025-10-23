@@ -3,3 +3,4 @@
 console.log('SYNC TEST');
 "console.log('SYNC TEST');" 
 "console.log('SYNC TEST');" 
+"// SYNC TEST AFTER FIX" 
