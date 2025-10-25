@@ -63,7 +63,7 @@ def add_item_to_cart(db: Session,product_var_uuid: UUID4, cart_id: int, item: sc
         db.refresh(existing_item)
         return existing_item
     
-    db_item = models.CartItem(shop_cart_id=cart_id, product_variation_id = product_var_uuid, quantity = item.quantity)
+    db_item = models.CartItem(shop_cart_id=cart_id, product_variation_uuid = product_var_uuid, quantity = item.quantity)
 
     db.add(db_item)
     db.commit()
