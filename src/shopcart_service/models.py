@@ -14,7 +14,7 @@ class ShopCart(Base, DateMixin):
     __tablename__ = "shop_carts"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_uuid = Column(UUID(as_uuid=True), nullable=False, default=uuid.uuid4)
+    user_uuid = Column(UUID(as_uuid=True), nullable=False)
 
     items = relationship("CartItem", back_populates="shop_cart", cascade="all, delete-orphan")
 
@@ -24,7 +24,7 @@ class CartItem(Base, DateMixin):
 
     id = Column(Integer, primary_key=True, index=True)
     shop_cart_id = Column(Integer, ForeignKey("shop_carts.id", ondelete="CASCADE"),nullable=False)
-    product_variation_id = Column(BigInteger, nullable=False)
+    product_variation_uuid = Column(UUID(as_uuid=True), nullable=False) 
     quantity = Column(Integer, default=1)
 
     shop_cart = relationship("ShopCart", back_populates="items")
