@@ -12,13 +12,13 @@ class CartItemCreate(CartItemBase):
 
 class CartItemRead(CartItemBase):
     id: int
-    product_variation_id: int
+    product_variation_uuid: UUID4
     quantity: int
     created_at: datetime
     updated_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes  = True
 
 
 class ShopCartBase(BaseModel):
@@ -38,4 +38,4 @@ class ShopCartRead(ShopCartBase):
     updated_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

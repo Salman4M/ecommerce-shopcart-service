@@ -54,7 +54,7 @@ def delete_cart_item(db: Session, item_id: int,cart_id: int):
 def add_item_to_cart(db: Session,product_var_uuid: UUID4, cart_id: int, item: schemas.CartItemCreate):
     existing_item = (
         db.query(models.CartItem)
-        .filter(models.CartItem.shop_cart_id==cart_id,models.CartItem.product_variation_id==product_var_uuid)
+        .filter(models.CartItem.shop_cart_id==cart_id,models.CartItem.product_variation_uuid==product_var_uuid)
         .first()
     )
     if existing_item:
@@ -64,6 +64,7 @@ def add_item_to_cart(db: Session,product_var_uuid: UUID4, cart_id: int, item: sc
         return existing_item
     
     db_item = models.CartItem(shop_cart_id=cart_id, product_variation_id = product_var_uuid, quantity = item.quantity)
+
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
