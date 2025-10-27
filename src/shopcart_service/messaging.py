@@ -3,7 +3,7 @@ import json
 import os
 import time
 from sqlalchemy.orm import Session
-from . import crud
+from . import crud, models
 from .core.db import SessionLocal
 
 
@@ -25,58 +25,135 @@ class RabbitMQConsumer:
         )
         return pika.BlockingConnection(parameters)
     
+    def handle_user_created(self, db: Session, message: dict):
+        try:
+            user_uuid = message.get('user_uuid')
+            if not user_uuid:
+                print(f"⚠️ Missing user_uuid in message")
+                return False
+            
+            cart = crud.create_cart(db, user_uuid)
+            print(f"✅ Created cart {cart.id} for user {user_uuid}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to create cart: {e}")
+            return False
+    
+    def handle_order_created(self, db: Session, message: dict):
+        try:
+            data = message.get('data', {})
+            user_uuid = data.get('user_uuid')
+            cart_id = data.get('cart_id')
+            order_id = data.get('order_id')
+            
+            if not all([user_uuid, cart_id]):
+                print(f"⚠️ Missing required fields in order.created event")
+                return False
+            
+            # Find the cart
+            cart = db.query(models.ShopCart).filter(
+                models.ShopCart.user_uuid == user_uuid,
+                models.ShopCart.id == cart_id
+            ).first()
+            
+            if not cart:
+                print(f"⚠️ Cart {cart_id} not found for user {user_uuid}")
+                return False
+            
+            # Delete all items from cart
+            deleted_count = db.query(models.CartItem).filter(
+                models.CartItem.shop_cart_id == cart_id
+            ).delete()
+            
+            db.commit()
+            print(f"✅ Cleared {deleted_count} items from cart {cart_id} after order {order_id}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to clear cart: {e}")
+            db.rollback()
+            return False
+    
     def callback(self, ch, method, properties, body):
-        """Handle incoming user.created events"""
+        """Handle incoming messages from RabbitMQ"""
+        db: Session = SessionLocal()
+        success = False
+        
         try:
             message = json.loads(body)
-            print(f"📨 Received message: {message}")
+            event_type = message.get('event_type') or message.get('event')
             
-            if message.get('event_type') == 'user.created' and message.get('is_active'):
-                user_uuid = message['user_uuid']
+            print(f"📨 Received event: {event_type}")
+            
+            # Route to appropriate handler
+            if event_type == 'user.created':
+                if message.get('is_active', True):  # Only create cart for active users
+                    success = self.handle_user_created(db, message)
+                else:
+                    print(f"ℹ️ Skipping inactive user")
+                    success = True
+                    
+            elif event_type == 'order.created':
+                success = self.handle_order_created(db, message)
                 
-                # Create cart for the user
-                db: Session = SessionLocal()
-                try:
-                    cart = crud.create_cart(db, user_uuid)
-                    print(f"✅ Created cart for user {user_uuid}: Cart ID {cart.id}")
-                    ch.basic_ack(delivery_tag=method.delivery_tag)
-                except Exception as e:
-                    print(f"❌ Failed to create cart: {e}")
-                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-                finally:
-                    db.close()
             else:
+                print(f"⚠️ Unknown event type: {event_type}")
+                success = True  # Ack unknown events to avoid blocking
+            
+            # Acknowledge or reject message
+            if success:
                 ch.basic_ack(delivery_tag=method.delivery_tag)
+            else:
+                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
                 
+        except json.JSONDecodeError as e:
+            print(f"❌ Invalid JSON: {e}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         except Exception as e:
             print(f"❌ Error processing message: {e}")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+        finally:
+            db.close()
     
     def start_consuming(self):
-        """Start consuming messages from RabbitMQ"""
         while True:
             try:
                 connection = self.get_connection()
                 channel = connection.channel()
                 
-                # Declare exchange
+                # Declare exchanges
                 channel.exchange_declare(
                     exchange='user_events',
                     exchange_type='topic',
                     durable=True
                 )
                 
-                # Declare queue
-                channel.queue_declare(
-                    queue='shopcart_user_events',
+                channel.exchange_declare(
+                    exchange='order_events',
+                    exchange_type='topic',
                     durable=True
                 )
                 
-                # Bind queue to exchange
+                # Declare queue
+                queue_name = 'shopcart_events'
+                channel.queue_declare(
+                    queue=queue_name,
+                    durable=True
+                )
+                
+                # Bind queue to user events
                 channel.queue_bind(
                     exchange='user_events',
-                    queue='shopcart_user_events',
+                    queue=queue_name,
                     routing_key='user.created'
+                )
+                
+                # Bind queue to order events
+                channel.queue_bind(
+                    exchange='order_events',
+                    queue=queue_name,
+                    routing_key='order.created'
                 )
                 
                 # Set prefetch count
@@ -84,19 +161,19 @@ class RabbitMQConsumer:
                 
                 # Start consuming
                 channel.basic_consume(
-                    queue='shopcart_user_events',
+                    queue=queue_name,
                     on_message_callback=self.callback
                 )
                 
-                print('🎧 Waiting for messages. To exit press CTRL+C')
+                print('🎧 Waiting for messages (user.created, order.created). To exit press CTRL+C')
                 channel.start_consuming()
                 
             except KeyboardInterrupt:
-                print("Stopping consumer...")
+                print("🛑 Stopping consumer...")
                 break
             except Exception as e:
                 print(f"❌ Connection error: {e}")
-                print("Retrying in 5 seconds...")
+                print("⏳ Retrying in 5 seconds...")
                 time.sleep(5)
 
 
