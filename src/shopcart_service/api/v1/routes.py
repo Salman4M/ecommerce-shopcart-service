@@ -34,7 +34,7 @@ def get_cart(
 
 
 @router.post("/{cart_id}/items/{product_var_uuid}", response_model=schemas.CartItemRead)
-def add_item(
+async def add_item(
     cart_id: int,
     product_var_uuid: UUID4,
     item: schemas.CartItemCreate,
@@ -46,7 +46,8 @@ def add_item(
     if not cart or cart.id != cart_id:
         raise HTTPException(status_code=403, detail="Not authorized to access this cart")
     
-    return crud.add_item_to_cart(db, product_var_uuid, cart_id, item)
+    return await crud.add_item_to_cart(db, product_var_uuid, cart_id, item)
+
 
 
 @router.put("/{cart_id}/items/{item_id}", response_model=schemas.CartItemRead)
